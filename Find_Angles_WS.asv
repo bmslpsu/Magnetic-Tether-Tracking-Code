@@ -7,19 +7,14 @@ if a==0
 end
 
 for j=1:length(string(files))
-    if a>1
-        v = VideoReader([dirVid files{j}]); %loads the video file
-    elseif a==1
-        v = VideoReader([dirVid files]);
-    else
-    end
+    if 
+    v = VideoReader([dirVid files{j}]); %loads the video file
+    %%
     i=1;
-    tic
     while hasFrame(v)
         video_data(:,:,i)=readFrame(v);
         i = i + 1;
     end
-    toc
     clear v
     %% take the first frame of the video
     First_Frame= video_data(:,:,1);

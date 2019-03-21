@@ -3,7 +3,7 @@ clc
 close all
 %%
 
-root = 'E:\WaelsCodes - Copy\Large Magno 7.5 and 3.75 experiments\';
+root = 'C:\Users\was29\Documents\MATLAB\Data for large Arena\';
 global dirXY dirCent dirThresh dirVid dirAng patstype
 num=2;
 Choose_Patterns_to_Analyze(root,num)
