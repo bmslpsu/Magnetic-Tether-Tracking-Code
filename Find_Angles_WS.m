@@ -68,6 +68,7 @@ for j=1:length(string(files))
     Fly_Struct(j).TrialNumber=temp{4};
     Fly_Struct(j).Unf_Angles=Angle_unw;
     Fly_Struct(j).COR=Center_User;
+    clear Video_Cropped
 end
 end
 
