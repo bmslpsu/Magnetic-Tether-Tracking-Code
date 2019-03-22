@@ -1,4 +1,4 @@
-function [angles]=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng)
+function [angles]=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng, debug)
 global patstype
 
 a=length(string(files));
@@ -15,6 +15,7 @@ for j=1:length(string(files))
     end
     i=1;
     tic
+    % gets the frames of the video
     while hasFrame(v)
         video_data(:,:,i)=readFrame(v);
         i = i + 1;
@@ -55,19 +56,39 @@ for j=1:length(string(files))
     for kk=1:i-1
         [C]=contourc(double(Video_Modified(:,:,kk)), [1 1]);
         del_pos=sqrt((C(1,2:end)-Center_User(1)).^2+ (C(2,2:end)-Center_User(2)).^2);
-        [dist, location_max]=max(del_pos);
-        Max_XY(kk,1)=C(1,location_max+1);
-        Max_XY(kk,2)=C(2,location_max+1);
-        angles(kk)=atan2(Max_XY(kk,2)-Center_User(2),Max_XY(kk,1)-Center_User(1)); %angle in rads
-        figure(1); plot(Max_XY(kk,1),Max_XY(kk,2),'*')
-        hold on
-        plot(C(1,2:end),C(2,2:end)); plot(Center_User(1),Center_User(2),'*')
-        xlim([-100 300])
-        ylim([-100 300])
-        hold off
+        
+        [dist, index]=maxk(del_pos,15);
+     
+        dist_x= C(1,index+1);
+        dist_y=C(2,index+1);
+        
+        Max_XY(1)=mean(dist_x);
+        Max_XY(2)=mean(dist_y);
+        angles(kk)=atan2(Max_XY(2)-Center_User(2),Max_XY(1)-Center_User(1)); %angle in rads
+        
+        % statement used to detect if the algorithm has located the head
+        % instead of the body
+        if kk>1
+            if abs(angles(kk)-angles(kk-1))>pi/3
+                angles(kk)=angles(kk)-pi;
+            end
+        end
+        
+        if debug==1 %allows us to see the point being tracked within the image
+            figure(1); plot(Max_XY(1),Max_XY(2),'*')
+            hold on
+            plot(C(1,2:end),C(2,2:end)); plot(Center_User(1),Center_User(2),'*')
+            xlim([-100 300])
+            ylim([-100 300])
+            hold off
+        end
         
     end
-    temp = strsplit(char(files(j)), {'_','.'});
+    if a>1
+        temp = strsplit(char(files(j)), {'_','.'});
+    elseif a==1
+        temp= strsplit(char(files), {'_','.'});
+    end
     Angle_unw = unwrap(angles);
     Fly_Struct(j).PatternTypes=patstype;
     Fly_Struct(j).FlyNumber=temp{2};

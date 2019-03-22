@@ -7,14 +7,19 @@ if a==0
 end
 
 for j=1:length(string(files))
-    if 
-    v = VideoReader([dirVid files{j}]); %loads the video file
-    %%
+    if a>1
+        v = VideoReader([dirVid files{j}]); %loads the video file
+    elseif a==1
+        v = VideoReader([dirVid files]);
+    else
+    end
     i=1;
+    tic
     while hasFrame(v)
         video_data(:,:,i)=readFrame(v);
         i = i + 1;
     end
+    toc
     clear v
     %% take the first frame of the video
     First_Frame= video_data(:,:,1);
@@ -50,9 +55,14 @@ for j=1:length(string(files))
     for kk=1:i-1
         [C]=contourc(double(Video_Modified(:,:,kk)), [1 1]);
         del_pos=sqrt((C(1,2:end)-Center_User(1)).^2+ (C(2,2:end)-Center_User(2)).^2);
-        [dist, location_max]=max(del_pos);
-        Max_XY(kk,1)=C(1,location_max+1);
-        Max_XY(kk,2)=C(2,location_max+1);
+        
+        [dist, index]=maxk(del_pos,10);
+     
+        dist_x= C(1,index+1);
+        dist_y=C(2,index+1);
+        
+        Max_XY(kk,1)=mean(dist_x);
+        Max_XY(kk,2)=mean(dist_y);
         angles(kk)=atan2(Max_XY(kk,2)-Center_User(2),Max_XY(kk,1)-Center_User(1)); %angle in rads
         figure(1); plot(Max_XY(kk,1),Max_XY(kk,2),'*')
         hold on
