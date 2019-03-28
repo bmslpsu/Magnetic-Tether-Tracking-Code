@@ -13,8 +13,10 @@ Choose_Patterns_to_Analyze(root,num)
     'Pick files for computing threshold', dirVid,'MultiSelect','on');
 
 
-%%
+%% find the yaw motion of each fly
 Fly_Struct=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng,1);
+
+%% make all the data the same length for analysis
 
 %% Functions
 function[]=  Choose_Patterns_to_Analyze(root, num)
