@@ -102,7 +102,7 @@ for j=1:length(string(files))
     Fly_Struct(j).Unf_Angles=Angle_unw;
     Fly_Struct(j).COR=Center_User;
     clear Video_Cropped
-    save([dirAng ['\Fly_' temp{2} 'trial_' temp{4} '.mat']],'Angle_unw')
+    save([dirAng ['\Fly_' temp{2} '_trial_' temp{4} '.mat']],'Angle_unw')
     
 end
 end
