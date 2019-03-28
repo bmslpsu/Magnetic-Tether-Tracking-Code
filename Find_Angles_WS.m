@@ -1,4 +1,4 @@
-function [angles]=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng, debug)
+function [Fly_Struct]=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng, debug)
 global patstype
 
 a=length(string(files));
@@ -7,6 +7,7 @@ if a==0
 end
 
 for j=1:length(string(files))
+    disp(['reading video ' num2str(j)]);
     if a>1
         v = VideoReader([dirVid files{j}]); %loads the video file
     elseif a==1
@@ -14,13 +15,15 @@ for j=1:length(string(files))
     else
     end
     i=1;
-    tic
     % gets the frames of the video
     while hasFrame(v)
         video_data(:,:,i)=readFrame(v);
         i = i + 1;
+        if i==1000 || i==2000 || i==4000
+            disp('Video is still being loaded')
+        end
     end
-    toc
+    disp('Done reading video')
     clear v
     %% take the first frame of the video
     First_Frame= video_data(:,:,1);
@@ -36,6 +39,8 @@ for j=1:length(string(files))
     for kk=1:i-1
         Video_Cropped(:,:,kk)=imcrop(video_data(:,:,kk),rect); %crops the entire video so they have the same size
     end
+    disp('Finished video cropping')
+    clear video_data
     %% finds the centroid of the contour
     figure(1) ; clf ; imshow(Cropped_First_Frame); title('Click on the center of rotation')
     Center_User=ginput(1);
@@ -46,6 +51,7 @@ for j=1:length(string(files))
     A3=imdilate(Video_Cropped,se,'full');
     A3=imerode(A3,se);
     A4=imbinarize(A3,thresh);
+     clear A3
     A5=uint8(255*imcomplement(A4));
     Video_Modified=imdilate(A5,se,'full');
     imshow(Video_Modified(:,:,1))
@@ -89,13 +95,15 @@ for j=1:length(string(files))
     elseif a==1
         temp= strsplit(char(files), {'_','.'});
     end
-    Angle_unw = unwrap(angles);
+    Angle_unw = unwrap(angles*180/pi);
     Fly_Struct(j).PatternTypes=patstype;
     Fly_Struct(j).FlyNumber=temp{2};
     Fly_Struct(j).TrialNumber=temp{4};
     Fly_Struct(j).Unf_Angles=Angle_unw;
     Fly_Struct(j).COR=Center_User;
     clear Video_Cropped
+    save([dirAng ['\Fly_' temp{2} 'trial_' temp{4} '.mat']],'Angle_unw')
+    
 end
 end
 

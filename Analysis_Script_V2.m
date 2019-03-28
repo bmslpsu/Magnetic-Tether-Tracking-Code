@@ -3,7 +3,7 @@ clc
 close all
 %%
 
-root = 'E:\Data for large Arena\';
+root = 'J:\Data for large Arena\';
 global dirXY dirCent dirThresh dirVid dirAng patstype
 num=2;
 Choose_Patterns_to_Analyze(root,num)
@@ -14,7 +14,7 @@ Choose_Patterns_to_Analyze(root,num)
 
 
 %%
-angles=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng,1);
+Fly_Struct=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng,1);
 
 %% Functions
 function[]=  Choose_Patterns_to_Analyze(root, num)
