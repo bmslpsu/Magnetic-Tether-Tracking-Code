@@ -1,7 +1,7 @@
 function [thresh] = Find_Threshold(video_data)
 disp('Select image to determine video threshold')
 
-T = 0.07:0.02:0.3;
+T = 0.1:0.02:0.33;
 [a b c]=size(video_data);
 %tries 5 different frames 
 for i=1:5

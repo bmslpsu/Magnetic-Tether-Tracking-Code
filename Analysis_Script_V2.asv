@@ -71,30 +71,7 @@ title('Angular Displacement for each individual fly with a 7.5 degree pattern')
 xlabel('time')
 ylabel('Displacement Degrees')
 
-
-%% box plot for displacement
-clear disp75cw disp75ccw
-for j=1:length(cw)
-    disp75cw(j)=cw(j).Motion_NoSaccade_Zeroed(end);
-end
-for j=1:length(ccw)
-    disp75ccw(j)=ccw(j).Motion_NoSaccade_Zeroed(end);
-end
-disp75cw=transpose(disp75cw);
-disp75ccw=transpose(disp75ccw);
-g = [zeros(length(disp75cw), 1); ones(length(disp75ccw), 1)];
-DISP=[disp75cw; disp75ccw];
-figure
-boxplot(DISP,g,'Labels',{'7.5 cw rotation','7.5 ccw roation'})
-title('Displacement in CW and ccw direction for 7.5 degree patterns')
-
-disp_total= [disp75cw; abs(disp75ccw)];
-figure
-boxplot(disp_total)
-title('Absolute Displacement for 7.5 degree patterns')
-
 %% Functions
-%---------------------------------------------------------------------
 function[]=  Choose_Patterns_to_Analyze(root, num)
 global dirXY dirCent dirThresh dirVid dirAng patstype
 if num==1
@@ -219,7 +196,7 @@ end
 end
 
 function []= plot_direction(cw, ccw,time)
-% subplot cw and ccw motion together
+%% subplot cw and ccw motion together
 
 figure
 size(time)
@@ -237,51 +214,4 @@ for i=1:length(ccw)
 end
 ylim([-2000 200])
 title('Fly Displacement for Various Positions in Counter-Clockwise Direction')
-end
-
-function [med, grand_med,fly_list]= Get_mean_avg(flys,min_length)
-%fTHIS function finds the average and median for each fly and then finds
-%the grand mean and average based on those
-%average of averages and mean of means fts
-
-% Finds the median for position x and grand median
-fly_list=[];
-for j=1:29
-    AA=[];
-    for i=1:length(flys)
-        if str2num(flys(i).FlyNumber)==j
-            AA=[AA; flys(i).Motion_NoSaccade_Zeroed];
-        end
-    end
-    [a b]= size(AA);
-    if a==1 %seems some flys have only a single trail for position 1 this eliminates the need to find a mean for these
-        med(j,:)=AA;
-        fly_list=[fly_list j];
-    elseif isempty(AA)==1
-        med(j,:)=nan*ones(1,min_length);
-    else
-        med(j,:)=median(AA);
-        fly_list=[fly_list j];
-    end
-end
-%filter out the nan values for the median
-med(any(isnan(med),2),:)=[];
-grand_med=median(med);
-end
-
-function [cw, ccw, no_rot, count]=Find_Directionv3(flys)
-cw=[];
-ccw=[];
-no_rot=[];
-for i=1:length(flys)
-    avg=flys(i).Motion_NoSaccade_Zeroed(end)-flys(i).Motion_NoSaccade_Zeroed(1);
-    if avg>0
-        cw=[cw flys(i)];
-    elseif avg<0
-        ccw=[ccw flys(i)];
-    else
-        no_rot=[no_rot flys(i)];
-    end
-    count=[length(cw) length(ccw) length(no_rot)];
-end
 end
