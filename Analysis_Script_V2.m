@@ -1,11 +1,16 @@
 clear all
 clc
 close all
+%% notes on errors/bugs in the code
+% the value of the angles must be cleared when moving to another fly.
+% During a test run i noticed many trials had similar motion towards the
+% end. While the data was cropped either ways, the function should still be
+% modified for this error.
 %%
 
 root = 'J:\Data for large Arena\';
 global dirXY dirCent dirThresh dirVid dirAng patstype
-num=2;
+num=3; %2 for 7.5 3 for 3.75
 Choose_Patterns_to_Analyze(root,num)
 
 %% loads the file names into matlab
@@ -19,8 +24,13 @@ Fly_Struct=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng,1);
 %% loads the required data into the system
 % this for analysis of data code not video, so you wont need the first part
 % if you lareayd have the angles
-load('flies_7.5.mat');
-Fly_Struct=Fly_Struct2;
+if num==2
+    load('flies_7.5.mat');
+    Fly_Struct=Fly_Struct2;
+elseif num==3
+    Fly_Struct=load('flies_3.75.5.mat');
+end
+    
 
 %% Filter Data and remove saccades
 Fs=250; %camera frame rate
