@@ -28,10 +28,8 @@ if num==2
     load('flies_7.5.mat');
     Fly_Struct=Fly_Struct2;
 elseif num==3
-    Fly_Struct=load('flies_3.75.5.mat');
+    load('flies_3.75.mat');
 end
-    
-
 %% Filter Data and remove saccades
 Fs=250; %camera frame rate
 
@@ -50,7 +48,12 @@ end
 % this part of the code makes it all the same length for easy plotting and
 % analysis
 [Fly_Struct, min_length]=ZeroAndCropData(Fly_Struct);
-time=(1:min_length)/160;
+time=(1:min_length)/250;
+figure
+for i=1:length(Fly_Struct)
+    plot(time, Fly_Struct(i).Motion_NoSaccade_Zeroed)
+    hold on
+end
 
 %% Find the direction count for each trial
 % data in count is formated in the following order :count =[cw ccw no_rotatation]
@@ -77,7 +80,11 @@ for i=1:length(Fly_Struct)
     plot(time,Fly_Struct(i).Motion_NoSaccade_Zeroed)
     hold on
 end
-title('Angular Displacement for each individual fly with a 7.5 degree pattern')
+if num ==2
+    title('Angular Displacement for each individual fly with a 7.5 degree pattern')
+elseif num==3
+    title('Angular Displacement for each individual fly with a 3.75 degree pattern')
+end
 xlabel('time')
 ylabel('Displacement Degrees')
 
@@ -95,13 +102,22 @@ disp75ccw=transpose(disp75ccw);
 g = [zeros(length(disp75cw), 1); ones(length(disp75ccw), 1)];
 DISP=[disp75cw; disp75ccw];
 figure
-boxplot(DISP,g,'Labels',{'7.5 cw rotation','7.5 ccw roation'})
-title('Displacement in CW and ccw direction for 7.5 degree patterns')
+if num==2
+    boxplot(DISP,g,'Labels',{'7.5 cw rotation','7.5 ccw roation'})
+    title('Displacement in CW and ccw direction for 7.5 degree patterns')
+elseif num==3
+    boxplot(DISP,g,'Labels',{'3.75 cw rotation','3.75 ccw roation'})
+    title('Displacement in CW and ccw direction for 3.75 degree patterns')
+end
 
 disp_total= [disp75cw; abs(disp75ccw)];
 figure
 boxplot(disp_total)
-title('Absolute Displacement for 7.5 degree patterns')
+if num==2
+    title('Absolute Displacement for 7.5 degree patterns')
+elseif num==3
+    title('Absolute Displacement for 3.75 degree patterns')
+end
 
 %% Functions
 %---------------------------------------------------------------------
@@ -145,7 +161,9 @@ wun = Fly_Struct.Unf_Angles;
 
 % filter data
 [b, a] = butter(3, 3.5/(Fs/2),'low');
-Fwin = filtfilt(b, a, wun);
+Fwin1 = filtfilt(b, a, wun);
+[b1, a1] = butter(3, 3.5/50,'low');
+Fwin = filtfilt(b, a, Fwin1);
 
 
 % get angular velocity in deg/s
@@ -160,7 +178,7 @@ STDvel = nanstd(AbsDwin);
 % Mvel2=nanmedian(AbsDwin./0.6745); %here data is sorted based on file names as an array
 % STDvel= nanstd(AbsDwin);
 
-T = Mvel + 2.5*STDvel; %tolerence at which movement is filtered out
+T = Mvel + 1.5*STDvel; %tolerence at which movement is filtered out
 
 AbsDwinN = AbsDwin;%angualr velocity deg/sec
 AbsDwinN(AbsDwinN < T) = 0; %filteres other movements and keeps saccads

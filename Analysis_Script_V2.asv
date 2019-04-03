@@ -1,11 +1,16 @@
 clear all
 clc
 close all
+%% notes on errors/bugs in the code
+% the value of the angles must be cleared when moving to another fly.
+% During a test run i noticed many trials had similar motion towards the
+% end. While the data was cropped either ways, the function should still be
+% modified for this error.
 %%
 
 root = 'J:\Data for large Arena\';
 global dirXY dirCent dirThresh dirVid dirAng patstype
-num=2;
+num=3; %2 for 7.5 3 for 3.75
 Choose_Patterns_to_Analyze(root,num)
 
 %% loads the file names into matlab
@@ -19,9 +24,12 @@ Fly_Struct=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng,1);
 %% loads the required data into the system
 % this for analysis of data code not video, so you wont need the first part
 % if you lareayd have the angles
-load('flies_7.5.mat');
-Fly_Struct=Fly_Struct2;
-
+if num==2
+    load('flies_7.5.mat');
+    Fly_Struct=Fly_Struct2;
+elseif num==3
+    load('flies_3.75.mat');
+end
 %% Filter Data and remove saccades
 Fs=250; %camera frame rate
 
@@ -40,7 +48,12 @@ end
 % this part of the code makes it all the same length for easy plotting and
 % analysis
 [Fly_Struct, min_length]=ZeroAndCropData(Fly_Struct);
-time=(1:min_length)/160;
+time=(1:min_length)/250;
+figure
+for i=1:length(Fly_Struct)
+    plot(time, Fly_Struct(i).Motion_NoSaccade_Zeroed)
+    hold on
+end
 
 %% Find the direction count for each trial
 % data in count is formated in the following order :count =[cw ccw no_rotatation]
@@ -67,11 +80,47 @@ for i=1:length(Fly_Struct)
     plot(time,Fly_Struct(i).Motion_NoSaccade_Zeroed)
     hold on
 end
-title('Angular Displacement for each individual fly with a 7.5 degree pattern')
+if num ==2
+    title('Angular Displacement for each individual fly with a 7.5 degree pattern')
+elseif num==3
+    title('Angular Displacement for each individual fly with a 3.75 degree pattern')
+end
 xlabel('time')
 ylabel('Displacement Degrees')
 
+
+%% box plot for displacement
+clear disp75cw disp75ccw
+for j=1:length(cw)
+    disp75cw(j)=cw(j).Motion_NoSaccade_Zeroed(end);
+end
+for j=1:length(ccw)
+    disp75ccw(j)=ccw(j).Motion_NoSaccade_Zeroed(end);
+end
+disp75cw=transpose(disp75cw);
+disp75ccw=transpose(disp75ccw);
+g = [zeros(length(disp75cw), 1); ones(length(disp75ccw), 1)];
+DISP=[disp75cw; disp75ccw];
+figure
+if num==2
+    boxplot(DISP,g,'Labels',{'7.5 cw rotation','7.5 ccw roation'})
+    title('Displacement in CW and ccw direction for 7.5 degree patterns')
+elseif num==3
+    boxplot(DISP,g,'Labels',{'3.75 cw rotation','3.75 ccw roation'})
+    title('Displacement in CW and ccw direction for 3.75 degree patterns')
+end
+
+disp_total= [disp75cw; abs(disp75ccw)];
+figure
+boxplot(disp_total)
+if num==2
+    title('Absolute Displacement for 7.5 degree patterns')
+elseif num==3
+    title('Absolute Displacement for 3.75 degree patterns')
+end
+
 %% Functions
+%---------------------------------------------------------------------
 function[]=  Choose_Patterns_to_Analyze(root, num)
 global dirXY dirCent dirThresh dirVid dirAng patstype
 if num==1
@@ -112,7 +161,9 @@ wun = Fly_Struct.Unf_Angles;
 
 % filter data
 [b, a] = butter(3, 3.5/(Fs/2),'low');
-Fwin = filtfilt(b, a, wun);
+Fwin1 = filtfilt(b, a, wun);
+[b1, a1] = butter(3, 3.5/50,'low');
+Fwin = filtfilt(b, a, Fwin1);
 
 
 % get angular velocity in deg/s
@@ -127,7 +178,7 @@ STDvel = nanstd(AbsDwin);
 % Mvel2=nanmedian(AbsDwin./0.6745); %here data is sorted based on file names as an array
 % STDvel= nanstd(AbsDwin);
 
-T = Mvel + 2.5*STDvel; %tolerence at which movement is filtered out
+T = Mvel + 5.5*STDvel; %tolerence at which movement is filtered out
 
 AbsDwinN = AbsDwin;%angualr velocity deg/sec
 AbsDwinN(AbsDwinN < T) = 0; %filteres other movements and keeps saccads
@@ -196,7 +247,7 @@ end
 end
 
 function []= plot_direction(cw, ccw,time)
-%% subplot cw and ccw motion together
+% subplot cw and ccw motion together
 
 figure
 size(time)
@@ -214,4 +265,51 @@ for i=1:length(ccw)
 end
 ylim([-2000 200])
 title('Fly Displacement for Various Positions in Counter-Clockwise Direction')
+end
+
+function [med, grand_med,fly_list]= Get_mean_avg(flys,min_length)
+%fTHIS function finds the average and median for each fly and then finds
+%the grand mean and average based on those
+%average of averages and mean of means fts
+
+% Finds the median for position x and grand median
+fly_list=[];
+for j=1:29
+    AA=[];
+    for i=1:length(flys)
+        if str2num(flys(i).FlyNumber)==j
+            AA=[AA; flys(i).Motion_NoSaccade_Zeroed];
+        end
+    end
+    [a b]= size(AA);
+    if a==1 %seems some flys have only a single trail for position 1 this eliminates the need to find a mean for these
+        med(j,:)=AA;
+        fly_list=[fly_list j];
+    elseif isempty(AA)==1
+        med(j,:)=nan*ones(1,min_length);
+    else
+        med(j,:)=median(AA);
+        fly_list=[fly_list j];
+    end
+end
+%filter out the nan values for the median
+med(any(isnan(med),2),:)=[];
+grand_med=median(med);
+end
+
+function [cw, ccw, no_rot, count]=Find_Directionv3(flys)
+cw=[];
+ccw=[];
+no_rot=[];
+for i=1:length(flys)
+    avg=flys(i).Motion_NoSaccade_Zeroed(end)-flys(i).Motion_NoSaccade_Zeroed(1);
+    if avg>0
+        cw=[cw flys(i)];
+    elseif avg<0
+        ccw=[ccw flys(i)];
+    else
+        no_rot=[no_rot flys(i)];
+    end
+    count=[length(cw) length(ccw) length(no_rot)];
+end
 end
