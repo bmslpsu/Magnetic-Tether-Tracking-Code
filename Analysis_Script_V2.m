@@ -165,18 +165,13 @@ Fwin1 = filtfilt(b, a, wun);
 [b1, a1] = butter(3, 3.5/50,'low');
 Fwin = filtfilt(b, a, Fwin1);
 
-
 % get angular velocity in deg/s
 Dwin = diff(Fwin)/(1/Fs); %diff takes an array and gives approximate derivative
 AbsDwin = abs(Dwin(1:end-15)); % take abs. value and remove spike at end
 
-%AbsDwin(AbsDwin > 3000) = NaN; % ignore peak vel > 3000
 
 Mvel = nanmedian(AbsDwin./0.6745); %this is done by trail and fly number, perhaphs it can be done with file name
 STDvel = nanstd(AbsDwin);
-
-% Mvel2=nanmedian(AbsDwin./0.6745); %here data is sorted based on file names as an array
-% STDvel= nanstd(AbsDwin);
 
 T = Mvel + 1.5*STDvel; %tolerence at which movement is filtered out
 
