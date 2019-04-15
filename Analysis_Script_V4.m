@@ -48,7 +48,7 @@ end
 % this part of the code makes it all the same length for easy plotting and
 % analysis
 [Fly_Struct, min_length]=ZeroAndCropData(Fly_Struct);
-time=(1:min_length)/250;
+time=(1:min_length)/Fs;
 figure
 for i=1:length(Fly_Struct)
     plot(time, Fly_Struct(i).Motion_NoSaccade_Zeroed)
@@ -122,39 +122,44 @@ end
 %% box plot for angular velocity
 load('Fly_Whole7.5.mat')
 Fly_Struct2=Fly_Struct;
-Fly_Struct2=Find_Ang_Vel(Fly_Struct2);
+Fly_Struct2=Find_Ang_Vel_V2(Fly_Struct2);
 for i=1:length(Fly_Struct2)
-    ang_vel75(i)=mean(abs(Fly_Struct2(i).Ang_vel));
+    ang_vel75(i)=Fly_Struct2(i).Delta_Ang_Vel;
 end
-
+%%
 load('Fly_Whole3.75.mat')
-Fly_Struct=Find_Ang_Vel(Fly_Struct);
+Fly_Struct=Find_Ang_Vel_V2(Fly_Struct);
 for i=1:length(Fly_Struct)
-    ang_vel375(i)=mean(abs(Fly_Struct(i).Ang_vel));
+    ang_vel375(i)=Fly_Struct(i).Delta_Ang_Vel;
 end
+%%
 
-ang_vel75=transpose(ang_vel75);
-ang_vel375=transpose(ang_vel375);
-g = [zeros(length(ang_vel75), 1); ones(length(ang_vel375), 1)];
-DISP=[ang_vel75; ang_vel375];
+g = [zeros(1,length(ang_vel75)) ones(1,length(ang_vel375))];
+DISP=abs([ang_vel75 ang_vel375]);
 
 figure
     boxplot(DISP,g,'Labels',{'7.5 Pattern','3.75 Pattern'})
     title('Angular Velocity for 7.5 and 3.75 patterns')
 %% t test to determine if the speeds for 7.5 and 3.75 are different
-p=Find_P_Value(Fly_Struct,Fly_Struct2);
+[p_delta,p_mean,p_med]=Find_P_Value(Fly_Struct,Fly_Struct2)
 %p value is 5.75x10^-9
 %% Functions
 %---------------------------------------------------------------------
-function [p]=Find_P_Value(Fly_Struct1,Fly_Struct2)
+function [p_delta,p_mean,p_med]=Find_P_Value(Fly_Struct1,Fly_Struct2)
 for i=1:length(Fly_Struct1)
-   mean_1(i)=mean(abs(Fly_Struct1(i).Ang_vel));
+    delta_1(i)=abs(Fly_Struct1(i).Delta_Ang_Vel);
+    mean_1(i)=abs(Fly_Struct1(i).ang_vel_mean);
+    med_1(i)=abs(Fly_Struct1(i).ang_vel_med);
 end
 for i=1:length(Fly_Struct2)
-   mean_2(i)=mean(abs(Fly_Struct2(i).Ang_vel));
+    delta_2(i)=abs(Fly_Struct2(i).Delta_Ang_Vel);
+    mean_2(i)=abs(Fly_Struct2(i).ang_vel_mean);
+    med_2(i)=abs(Fly_Struct2(i).ang_vel_med);
 end
 
-[h,p]=ttest2(mean_1,mean_2,'Vartype','unequal','Tail','both');
+[h,p_delta]=ttest2(delta_1,delta_2,'Vartype','unequal','Tail','both');
+[h,p_mean]=ttest2(mean_1,mean_2,'Vartype','unequal','Tail','both');
+[h,p_med]=ttest2(med_1,med_2,'Vartype','unequal','Tail','both');
 end
 function[]=  Choose_Patterns_to_Analyze(root, num)
 global dirXY dirCent dirThresh dirVid dirAng patstype

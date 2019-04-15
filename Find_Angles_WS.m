@@ -1,4 +1,7 @@
 function [Fly_Struct]=Find_Angles_WS(files, root,dirVid,dirXY,dirThresh,dirAng, debug)
+%notes:
+%- output angles of the function are in degrees
+%-
 global patstype
 
 a=length(string(files));

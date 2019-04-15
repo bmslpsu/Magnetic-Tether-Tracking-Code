@@ -33,16 +33,16 @@ title('Angular Displacement')
 figure
 boxplot([abs(ang_vel_test) abs(ang_vel_mean) abs(ang_vel_med)]  ,[ones(1,length(ang_vel_test)) 2*ones(1,length(ang_vel_mean)) 3*ones(1,length(ang_vel_med))])
 title('Box plots for velocity by disp, mean, and median')
-
-[h,p_del_mean]=ttest2(ang_vel_test,ang_vel_mean,'Vartype','unequal','Tail','both');
-[h,p_med_mean]=ttest2(ang_vel_med,ang_vel_mean,'Vartype','unequal','Tail','both');
-[h,p_del_med]=ttest2(ang_vel_test,ang_vel_med,'Vartype','unequal','Tail','both');
-figure 
-plot([p_del_mean p_med_mean p_del_med],'*')
-title('p-value for the different methods to study the angular velocity')
-ylim([-0.1 1.2])
-
 end
 
+%% functions--
+function [p]=Find_P_Value(Fly_Struct1,Fly_Struct2)
+for i=1:length(Fly_Struct1)
+   mean_1(i)=mean(abs(Fly_Struct1(i).Ang_vel));
+end
+for i=1:length(Fly_Struct2)
+   mean_2(i)=mean(abs(Fly_Struct2(i).Ang_vel));
+end
 
-
+[h,p]=ttest2(mean_1,mean_2,'Vartype','unequal','Tail','both');
+end
