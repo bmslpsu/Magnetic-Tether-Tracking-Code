@@ -10,7 +10,7 @@ close all
 
 root = 'J:\Data for large Arena\';
 global dirXY dirCent dirThresh dirVid dirAng patstype
-num=3; %2 for 7.5 3 for 3.75
+num=2; %2 for 7.5 3 for 3.75
 Choose_Patterns_to_Analyze(root,num)
 
 %% loads the file names into matlab
@@ -142,7 +142,7 @@ figure
     boxplot(DISP,g,'Labels',{'7.5 Pattern','3.75 Pattern'})
     title('Angular Velocity for 7.5 and 3.75 patterns')
 %% t test to determine if the speeds for 7.5 and 3.75 are different
-p=Find_P_Value(Fly_Struct,Fly_Struct2)
+p=Find_P_Value(Fly_Struct,Fly_Struct2);
 %p value is 5.75x10^-9
 %% Functions
 %---------------------------------------------------------------------
