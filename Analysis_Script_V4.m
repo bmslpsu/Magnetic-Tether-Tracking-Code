@@ -125,14 +125,16 @@ Fly_Struct2=Fly_Struct;
 Fly_Struct2=Find_Ang_Vel_V2(Fly_Struct2);
 for i=1:length(Fly_Struct2)
     ang_vel75(i)=Fly_Struct2(i).Delta_Ang_Vel;
+    disp_75(i)=Fly_Struct2(i).Motion_NoSaccade_Zeroed(end);
 end
 %%
 load('Fly_Whole3.75.mat')
 Fly_Struct=Find_Ang_Vel_V2(Fly_Struct);
 for i=1:length(Fly_Struct)
     ang_vel375(i)=Fly_Struct(i).Delta_Ang_Vel;
+    disp_375(i)=Fly_Struct(i).Motion_NoSaccade_Zeroed(end);
 end
-%%
+%% box plots that include 3.75 and 7.5
 
 g = [zeros(1,length(ang_vel75)) ones(1,length(ang_vel375))];
 DISP=abs([ang_vel75 ang_vel375]);
@@ -140,6 +142,13 @@ DISP=abs([ang_vel75 ang_vel375]);
 figure
     boxplot(DISP,g,'Labels',{'7.5 Pattern','3.75 Pattern'})
     title('Angular Velocity for 7.5 and 3.75 patterns')
+    
+    g1 = [zeros(1,length(disp_75)) ones(1,length(disp_375))];
+DISP1=abs([disp_75 disp_375]);
+
+figure
+    boxplot(DISP1,g1,'Labels',{'7.5 Pattern','3.75 Pattern'})
+    title('Angular Displacement for 7.5 and 3.75 patterns')
 %% t test to determine if the speeds for 7.5 and 3.75 are different
 [p_delta,p_mean,p_med]=Find_P_Value(Fly_Struct,Fly_Struct2)
 %p value is 5.75x10^-9
